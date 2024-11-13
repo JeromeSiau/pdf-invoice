@@ -79,6 +79,7 @@ class InvoicePrinter extends FPDF
     public $quantityField;
     public $priceField;
     public $totalField;
+    public $totalWoVatField;
     public $discountField;
     public $vatField;
     public $productsEnded;
@@ -324,7 +325,7 @@ class InvoicePrinter extends FPDF
         ];
     }
 
-    public function addItem($item, $description, $quantity, $vat, $price, $discount, $total)
+    public function addItem($item, $description, $quantity, $vat, $price, $discount, $totalWoVatField, $total)
     {
         $itemColumns = 1;
 
@@ -367,6 +368,14 @@ class InvoicePrinter extends FPDF
             $this->totalField = true;
 
             $itemColumns++;
+        }
+
+        if ($totalWoVatField !== false) {
+            $p['totalWoVatField'] = $totalWoVatField;
+            if (is_numeric($totalWoVatField)) {
+                $p['totalWoVatField'] = $this->price($totalWoVatField);
+            }
+            $this->totalWoVatField = true;
         }
 
         if ($discount !== false) {
@@ -664,6 +673,19 @@ class InvoicePrinter extends FPDF
                     $width_other,
                     10,
                     iconv(self::ICONV_CHARSET_INPUT, self::ICONV_CHARSET_OUTPUT_A, mb_strtoupper($this->lang['discount'], self::ICONV_CHARSET_INPUT)),
+                    0,
+                    0,
+                    'C',
+                    0
+                );
+            }
+
+            if (isset($this->totalWoVatField)) {
+                $this->Cell($this->columnSpacing, 10, '', 0, 0, 'L', 0);
+                $this->Cell(
+                    $width_other,
+                    10,
+                    iconv(self::ICONV_CHARSET_INPUT, self::ICONV_CHARSET_OUTPUT_A, mb_strtoupper($this->lang['totalWoVat'], self::ICONV_CHARSET_INPUT)),
                     0,
                     0,
                     'C',

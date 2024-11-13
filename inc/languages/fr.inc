@@ -1,6 +1,6 @@
 <?php
-    $lang['number']   = 'Référence';
-    $lang['date']     = 'Date de facturation';
+    $lang['number']   = 'N°';
+    $lang['date']     = 'Date facture';
     $lang['time']     = 'Heure de facturation';
     $lang['due']      = 'Date d\'échéance';
     $lang['to']       = 'Facturé à';
@@ -10,6 +10,7 @@
     $lang['price']    = 'Prix unit. HT';
     $lang['discount'] = 'Réduction';
     $lang['vat']      = 'TVA';
-    $lang['total']    = 'Total';
+    $lang['totalWoVat'] = 'Total HT';
+    $lang['total']    = 'Total TTC';
     $lang['page']     = 'Page';
     $lang['page_of']  = 'sur';
