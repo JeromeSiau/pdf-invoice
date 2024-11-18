@@ -63,6 +63,7 @@ class InvoicePrinter extends FPDF
     public $from;
     public $to;
     public $items;
+    public $vatItems;
     public $totals;
     public $totalsAlignment = 'vertical';
     public $badge;
@@ -89,6 +90,7 @@ class InvoicePrinter extends FPDF
     public function __construct($size = self::INVOICE_SIZE_A4, $currency = '$', $language = 'en')
     {
         $this->items = [];
+        $this->vatItems = [];
         $this->totals = [];
         $this->addText = [];
         $this->currency = $currency;
@@ -373,8 +375,14 @@ class InvoicePrinter extends FPDF
 
         if ($vat !== false) {
             $p['vat'] = $vat;
+            
             if (is_numeric($vat)) {
                 $p['vat'] = $this->price($vat);
+            } else if (preg_match('/^([\d.]+)\s*\(([\d.]+%)\)$/', $vat, $matches)) {
+                // Format: "number (percentage%)"
+                $numericPart = $matches[1];
+                $percentagePart = $matches[2];
+                $p['vat'] = $this->price($numericPart) . ' (' . $percentagePart . ')';
             }
             $this->vatField = true;
 
@@ -401,6 +409,18 @@ class InvoicePrinter extends FPDF
         }
 
         $this->items[] = $p;
+    }
+
+    public function addVatItem($rate, $amount, $value) {
+        $v['rate'] = round($rate, 2) . '%';
+        $v['amount'] = $amount;
+        if (is_numeric($amount)) {
+            $v['amount'] = $this->price($amount);
+        }
+        if (is_numeric($value)) {
+            $v['value'] = $this->price($value);
+        }
+        $this->vatItems[] = $v;
     }
 
     public function addTotal($name, $value, $colored = false)
@@ -950,6 +970,41 @@ class InvoicePrinter extends FPDF
             } else {
                 $this->Ln(18);
             }
+        }
+
+        if ($this->vatItems) {
+            $this->Ln(5);
+            $tableWidth = 80; 
+            $colWidth = $tableWidth / 3; 
+            $startX = $this->document['w'] - $this->margins['r'] - $tableWidth; // Right aligned
+            
+            // Set styling
+            $this->SetFillColor($this->color[0], $this->color[1], $this->color[2]);
+            $this->SetTextColor(255, 255, 255);
+            $this->SetDrawColor($this->color[0], $this->color[1], $this->color[2]);
+            $this->SetLineWidth(.3);
+            $this->SetFont($this->font, 'b', 8);
+            
+            // Headers
+            $this->SetX($startX);
+            $this->Cell($colWidth, 7, $this->lang['vat_rate'], 1, 0, 'C', true);
+            $this->Cell($colWidth, 7, $this->lang['totalWoVat'], 1, 0, 'C', true);
+            $this->Cell($colWidth, 7, $this->lang['vat'], 1, 1, 'C', true);
+            
+            // Reset colors for content
+            $this->SetTextColor(50, 50, 50);
+            $this->SetFont($this->font, '', 8);
+            $bgcolor = (1 - $this->columnOpacity) * 255;
+            $this->SetFillColor($bgcolor, $bgcolor, $bgcolor);
+            
+            // Content
+            foreach ($this->vatItems as $vatItem) {
+                $this->SetX($startX);
+                $this->Cell($colWidth, 6, iconv(self::ICONV_CHARSET_INPUT, self::ICONV_CHARSET_OUTPUT_B, $vatItem['rate']), 1, 0, 'C', true);
+                $this->Cell($colWidth, 6, iconv(self::ICONV_CHARSET_INPUT, self::ICONV_CHARSET_OUTPUT_B, $vatItem['amount']), 1, 0, 'R', true);
+                $this->Cell($colWidth, 6, iconv(self::ICONV_CHARSET_INPUT, self::ICONV_CHARSET_OUTPUT_B, $vatItem['value']), 1, 1, 'R', true);
+            }
+            $this->Ln(5);
         }
 
         //Add information

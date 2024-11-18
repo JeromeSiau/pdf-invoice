@@ -8,7 +8,8 @@
     $lang['product']  = 'Product';
     $lang['qty']      = 'Qty';
     $lang['price']    = 'Unit price w/o VAT';
-    $lang['discount'] = 'Discount';
+    $lang['discount'] = 'Discount w/o VAT';
+    $lang['vat_rate'] = 'Vat rate';
     $lang['vat']      = 'Vat';
     $lang['totalWoVat'] = 'Total w/o VAT';
     $lang['total']    = 'Total with VAT';
