@@ -7,7 +7,7 @@
     $lang['from']     = 'Billing from';
     $lang['product']  = 'Product';
     $lang['qty']      = 'Qty';
-    $lang['price']    = 'Net Unit Price';
+    $lang['price']    = 'Net U Price';
     $lang['discount'] = 'Net discount';
     $lang['vat_rate'] = 'Vat rate';
     $lang['vat']      = 'Vat';
